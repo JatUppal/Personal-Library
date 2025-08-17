@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/personal_library 
+    username: library_user
+    password: library_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: "uvEipNNm4/QsSFZkiHrmvybnRmm8krYnxUxGxcz+W9aGk3W4g7P5OVlv+YaCvd3hwvp+OHG0Rlcn8eDb92isXw=="
+    issuer: "personal-library"
+    accessTokenMinutes: 60
+    refreshTokenDays: 7

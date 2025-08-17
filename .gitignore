@@ -1,0 +1,18 @@
+# Java / Spring Boot
+target/
+*.class
+*.log
+
+# Node / React (frontend will be in ui/)
+ui/node_modules/
+ui/dist/
+
+# Docker
+pgdata/
+*.env
+
+# OS / IDEs
+.DS_Store
+.idea/
+.vscode/
+
