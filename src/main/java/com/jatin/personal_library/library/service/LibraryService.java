@@ -47,21 +47,49 @@ public class LibraryService {
 
     @Transactional
     public Result addManual(int uid, AddManualBookRequest req) {
-        // 1) find or create Book (by isbn13 if provided)
+        // helper
+        java.util.function.Function<String,String> t = s ->
+            (s == null || s.trim().isEmpty()) ? null : s.trim();
+
+        // 1) find-or-create Book (by isbn13 if provided)
         Book book;
         if (req.isbn13() != null && !req.isbn13().isBlank()) {
             String isbn = normalizeIsbn(req.isbn13());
-            book = books.findByIsbn13(isbn).orElseGet(() -> {
-                Book b = new Book(req.title());
-                b.setAuthors(req.authors());
+            book = books.findByIsbn13(isbn).orElse(null);
+            if (book == null) {
+                // create new with ALL props (incl. cover/description)
+                Book b = new Book(t.apply(req.title()));
+                b.setAuthors(t.apply(req.authors()));
                 b.setPublishedYear(req.publishedYear());
                 b.setIsbn13(isbn);
-                return books.save(b);
-            });
+                b.setPageCount(req.pageCount());
+                b.setCoverUrl(t.apply(req.coverUrl()));         // <-- persist cover
+                b.setDescription(t.apply(req.description()));   // <-- persist description
+                book = books.save(b);
+            } else {
+                // already have this book — optionally fill missing fields
+                if (book.getCoverUrl() == null && req.coverUrl() != null && !req.coverUrl().isBlank()) {
+                    book.setCoverUrl(t.apply(req.coverUrl()));
+                }
+                if ((book.getDescription() == null || book.getDescription().isBlank())
+                        && req.description() != null && !req.description().isBlank()) {
+                    book.setDescription(t.apply(req.description()));
+                }
+                // also allow updating title/authors/year if they were empty
+                if (book.getTitle() == null)        book.setTitle(t.apply(req.title()));
+                if (book.getAuthors() == null)      book.setAuthors(t.apply(req.authors()));
+                if (book.getPublishedYear() == null) book.setPublishedYear(req.publishedYear());
+                if (book.getPageCount() == null)     book.setPageCount(req.pageCount());
+                book = books.save(book);
+            }
         } else {
-            Book b = new Book(req.title());
-            b.setAuthors(req.authors());
+            // no ISBN — create a new Book with all fields
+            Book b = new Book(t.apply(req.title()));
+            b.setAuthors(t.apply(req.authors()));
             b.setPublishedYear(req.publishedYear());
+            b.setPageCount(req.pageCount());
+            b.setCoverUrl(t.apply(req.coverUrl()));          // <-- persist cover
+            b.setDescription(t.apply(req.description()));    // <-- persist description
             book = books.save(b);
         }
 
@@ -72,14 +100,16 @@ public class LibraryService {
             return new Result(toRow(ub), false, ub.getId());
         }
 
-        // 3) create UserBook with default status
-        User userRef = em.getReference(User.class, uid); // no DB hit until needed
+        // 3) create UserBook with default status; mirror description into notes
+        User userRef = em.getReference(User.class, uid);
         UserBook ub = new UserBook(userRef, book);
-        ub.setStatus(ReadingStatus.PLANNED); // enum, not String
+        ub.setStatus(ReadingStatus.PLANNED);
+        ub.setNotes(t.apply(req.description())); // <-- so details() shows it immediately
         ub = userBooks.save(ub);
 
         return new Result(toRow(ub), true, ub.getId());
     }
+
 
     @Transactional
     public Result importByGoogleVolumeId(int uid, String volumeId) {
@@ -176,7 +206,7 @@ public class LibraryService {
         Book b = ub.getBook();
         return new LibraryRow(
                 ub.getId(), b.getId(), b.getTitle(), b.getAuthors(),
-                b.getPublishedYear(), ub.getStatus(), ub.getRating()
+                b.getPublishedYear(), ub.getStatus(), ub.getRating(), b.getCoverUrl()
         );
     }
 

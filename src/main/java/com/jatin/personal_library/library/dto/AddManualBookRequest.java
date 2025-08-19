@@ -6,5 +6,8 @@ public record AddManualBookRequest(
         @NotBlank String title,
         String authors,
         Integer publishedYear,
-        String isbn13   // optional
+        String description,
+        String coverUrl,
+        String isbn13,
+        Integer pageCount
 ) {}

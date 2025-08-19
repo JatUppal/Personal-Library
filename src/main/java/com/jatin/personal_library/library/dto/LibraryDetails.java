@@ -1,15 +1,16 @@
 package com.jatin.personal_library.library.dto;
 
-import com.jatin.personal_library.library.domain.ReadingStatus;
 import java.util.UUID;
 
-public record LibraryRow(
+public record LibraryDetails(
         UUID id,
-        UUID bookId,
         String title,
         String authors,
         Integer publishedYear,
-        ReadingStatus status,
+        String status,
         Integer rating,
-        String coverUrl
+        String isbn13,
+        Integer pageCount,
+        String coverUrl,
+        String description
 ) {}

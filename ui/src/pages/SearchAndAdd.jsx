@@ -6,6 +6,9 @@ export default function SearchAndAdd({ onImported }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [addingId, setAddingId] = useState(null);
+
+
 
   // modal state
   const [open, setOpen] = useState(false);
@@ -80,20 +83,6 @@ export default function SearchAndAdd({ onImported }) {
     setOpen(true);
   }
 
-  function openPrefilledFromGoogle(item) {
-    setForm({
-      googleVolumeId: item.googleVolumeId || "",
-      title: item.title || "",
-      authors: (item.authors || []).join(", "),
-      publishedYear: item.publishedYear || "",
-      isbn13: item.isbn13 || "",
-      pageCount: item.pageCount || "",
-      coverUrl: item.coverUrl || "",
-      description: item.description || "",
-    });
-    setReadonly(true); // readonly until user clicks Edit
-    setOpen(true);
-  }
 
   function closeModal() {
     setOpen(false);
@@ -128,8 +117,8 @@ export default function SearchAndAdd({ onImported }) {
           isbn13: form.isbn13.trim() || null,
           // backend ignores these if not mapped; safe to send if you later support them
           pageCount: toIntOrNull(form.pageCount),
-          coverUrl: form.coverUrl || null,
-          description: form.description || null,
+          coverUrl: (form.coverUrl?.trim() || null),
+          description: (form.description?.trim() || null),
         };
         if (!payload.title) {
           setSaving(false);
@@ -159,14 +148,52 @@ export default function SearchAndAdd({ onImported }) {
     }
   }
 
+  async function addByVolume(googleVolumeId) {
+    if (!googleVolumeId) return;
+    setAddingId(googleVolumeId);
+    setErr("");
+  
+    try {
+      await api.post("/me/library/import", { googleVolumeId });
+      // success: clear search + close dropdown + refresh table
+      setQ("");
+      setResults([]);
+      onImported?.();
+    } catch (e) {
+      const status = e?.response?.status;
+      if (status === 409) {
+        // already in library — treat as success
+        setQ("");
+        setResults([]);
+        onImported?.();
+      } else if (status === 400) {
+        setErr(e?.response?.data?.message || "Invalid request.");
+      } else {
+        setErr("Add failed. Please try again.");
+      }
+    } finally {
+      setAddingId(null);
+    }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter" && results.length > 0) {
+      e.preventDefault();
+      addByVolume(results[0].googleVolumeId);
+    }
+  }
+  
+  
+
   return (
     <div style={{ position: "relative" }}>
       {/* Search bar */}
       <input
         className="input"
-        placeholder="Search books (e.g., Dune)"
+        placeholder="Search by title (e.g., Dune)"
         value={q}
         onChange={(e) => setQ(e.target.value)}
+        onKeyDown={handleKeyDown}
       />
       {loading && (
         <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6 }}>Searching…</div>
@@ -235,10 +262,11 @@ export default function SearchAndAdd({ onImported }) {
               </div>
               <button
                 className="btn"
-                style={{ padding: "6px 10px", fontSize: 14 }}
-                onClick={() => openPrefilledFromGoogle(r)}
+                style={{ padding: "6px 10px", fontSize: 14, opacity: addingId === r.googleVolumeId ? 0.6 : 1 }}
+                onClick={() => addByVolume(r.googleVolumeId)}
+                disabled={addingId === r.googleVolumeId}
               >
-                Add
+                {addingId === r.googleVolumeId ? "Adding…" : "Add"}
               </button>
             </div>
           ))}

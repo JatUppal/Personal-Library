@@ -2,12 +2,14 @@ package com.jatin.personal_library.library.api;
 
 import com.jatin.personal_library.library.dto.AddManualBookRequest;
 import com.jatin.personal_library.library.dto.LibraryRow;
+import com.jatin.personal_library.library.dto.PageResponse;
 import com.jatin.personal_library.library.dto.UpdateLibraryRequest;
 import com.jatin.personal_library.library.dto.UpdateStatusRequest;
 import com.jatin.personal_library.library.repo.UserBookRepository;
 import com.jatin.personal_library.library.service.LibraryService;
 import com.jatin.personal_library.config.JwtService;
 import com.jatin.personal_library.library.dto.ImportByGoogleRequest;
+import com.jatin.personal_library.library.dto.LibraryDetails;
 import com.jatin.personal_library.user.User;
 import com.jatin.personal_library.user.UserRepository;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -56,16 +58,18 @@ public class LibraryController {
     }
 
     @GetMapping("/library")
-    public Page<LibraryRow> myLibrary(
-            @RequestParam(required = false) String q,
-            Pageable pageable,
-            HttpServletRequest request
+    public PageResponse<LibraryRow> myLibrary(
+        @RequestParam(required = false) String q,
+        Pageable pageable,
+        HttpServletRequest request
     ) {
         Integer uid = requireUid(request);
         String query = (q == null || q.isBlank()) ? null : q;
 
-        return libraryService.listUserLibrary(uid, query, pageable);
+        Page<LibraryRow> page = libraryService.listUserLibrary(uid, query, pageable);
+        return PageResponse.from(page);
     }
+
 
     // ===== PUT /me/library/{id} - full update of status/rating/notes =====
     @PutMapping("/library/{id}")
@@ -79,7 +83,7 @@ public class LibraryController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Library entry not found"));
 
         if (body.status() != null)  ub.setStatus(body.status());
-        if (body.rating() != null)  ub.setRating(body.rating());
+        ub.setRating(body.rating());
         ub.setNotes(body.notes());
 
         userBooks.save(ub); // still inside the transaction
@@ -87,7 +91,7 @@ public class LibraryController {
         var b = ub.getBook(); // safe: fetched eagerly
         return new LibraryRow(
                 ub.getId(), b.getId(), b.getTitle(), b.getAuthors(),
-                b.getPublishedYear(), ub.getStatus(), ub.getRating()
+                b.getPublishedYear(), ub.getStatus(), ub.getRating(), b.getCoverUrl()
         );
     }
 
@@ -149,6 +153,22 @@ public class LibraryController {
         return result.created()
                 ? ResponseEntity.created(location).body(result.row())
                 : ResponseEntity.ok(result.row());
+    }
+
+    @GetMapping("/library/{id}")
+    @Transactional(readOnly = true)
+    public LibraryDetails details(@PathVariable UUID id, HttpServletRequest request) {
+        Integer uid = requireUid(request);
+        var ub = userBooks.findByIdAndUserIdFetchBook(id, uid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Library entry not found"));
+        var b = ub.getBook();
+        String desc = (ub.getNotes() != null && !ub.getNotes().isBlank())
+            ? ub.getNotes()
+            : b.getDescription();
+        return new LibraryDetails(
+                ub.getId(), b.getTitle(), b.getAuthors(), b.getPublishedYear(),
+                ub.getStatus().name(), ub.getRating(), b.getIsbn13(), b.getPageCount(), b.getCoverUrl(), desc
+        );
     }
 
 }

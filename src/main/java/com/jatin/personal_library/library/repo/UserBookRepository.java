@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public interface UserBookRepository extends JpaRepository<UserBook, UUID> {
 
-    // Uniqueness guard (user_id, book_id) is unique in DB
+    // Uniqueness guard (user_id, book_id)
     Optional<UserBook> findByUserIdAndBookId(Integer userId, UUID bookId);
     Optional<UserBook> findByIdAndUserId(UUID id, Integer userId);
     boolean existsByUserIdAndBookId(Integer userId, UUID bookId);
@@ -25,7 +25,7 @@ public interface UserBookRepository extends JpaRepository<UserBook, UUID> {
     Page<UserBook> findByUserId(Integer userId, Pageable pageable);
     Page<UserBook> findByUserIdAndStatus(Integer userId, ReadingStatus status, Pageable pageable);
 
-    // When you already have entities loaded (optional convenience)
+    // When you already have entities loaded
     Optional<UserBook> findByUserAndBook(User user, Book book);
 
     // Stats / counts
@@ -43,30 +43,35 @@ public interface UserBookRepository extends JpaRepository<UserBook, UUID> {
            """)
     Optional<UserBook> findByIdAndUserIdFetchBook(@Param("id") UUID id, @Param("userId") Integer userId);
 
-
-
     @Query("""
-    select new com.jatin.personal_library.library.dto.LibraryRow(
-    ub.id, b.id, b.title, b.authors, b.publishedYear, ub.status, ub.rating
-    )
-    from UserBook ub
-    join ub.book b
-    where ub.user.id = :userId
-    order by b.title
-    """)
-    Page<LibraryRow> findRows(Integer userId, Pageable pageable);
+           select new com.jatin.personal_library.library.dto.LibraryRow(
+             ub.id, b.id, b.title, b.authors, b.publishedYear,
+             ub.status, ub.rating, b.coverUrl
+           )
+           from UserBook ub
+           join ub.book b
+           where ub.user.id = :userId
+           order by b.title
+           """)
+    Page<LibraryRow> findRows(@Param("userId") Integer userId, Pageable pageable);
 
-    /*
-     * @Query("""
-    select new com.jatin.personal_library.library.dto.LibraryRow(
-    ub.id, b.id, b.title, b.authors, b.publishedYear, ub.status, ub.rating
-    )
-    from UserBook ub
-    join ub.book b
-    where ub.user.id = :userId
-    and (:q is null or lower(b.title) like concat('%', lower(:q), '%'))
-    order by b.title
-    """)
-    Page<LibraryRow> findRowsFiltered(Integer userId, String q, Pageable pageable);
-        */
+    /**  Uncomment this if your service supports search (?q=)
+    @Query("""
+           select new com.jatin.personal_library.library.dto.LibraryRow(
+             ub.id, b.id, b.title, b.authors, b.publishedYear,
+             ub.status, ub.rating, b.coverUrl
+           )
+           from UserBook ub
+           join ub.book b
+           where ub.user.id = :userId
+             and (
+               :q is null
+               or lower(b.title)   like lower(concat('%', :q, '%'))
+               or lower(b.authors) like lower(concat('%', :q, '%'))
+             )
+           order by b.title
+           """)
+    Page<LibraryRow> findRowsFiltered(@Param("userId") Integer userId,
+                                      @Param("q") String q,
+                                      Pageable pageable);**/
 }
