@@ -193,14 +193,14 @@ export default function Library() {
             overflow: "hidden",
           }}
         >
-          <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0 }}>
+          <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0, tableLayout: "fixed"}}>
           <colgroup>
-            <col key="book" style={{ width: "52%" }} />
+            <col key="book" style={{ width: "42%" }} />
             <col key="authors" style={{ width: "18%" }} />
             <col key="year" style={{ width: "8%" }} />
             <col key="status" style={{ width: "10%" }} />
             <col key="rating" style={{ width: "6%" }} />
-            <col key="action" style={{ width: "6%" }} />
+            <col key="action" style={{ width: "18%" }} />
           </colgroup>
             <thead style={{ background: "hsl(220 20% 98%)" }}>
               <tr>
@@ -230,23 +230,38 @@ export default function Library() {
   
               {rows.map((r) => (
                 <tr key={r.id}>
-                  <td style={{ padding: "12px 14px", borderBottom: "1px solid var(--border)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                  <td style={{ padding: "12px 14px", borderBottom: "1px solid var(--border)", overflow: "hidden" }}>
+                    <div
+                        style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        minWidth: 0,   // allow children to shrink
+                        width: "100%", // fill the cell
+                        }}
+                    >
                         <Thumb url={r.coverUrl} title={r.title} />
+
                         <button
                         onClick={() => openView(r.id)}
                         className="link"
+                        title={r.title} // full title tooltip
                         style={{
                             fontSize: 16,
                             background: "transparent",
                             border: 0,
                             padding: 0,
                             cursor: "pointer",
+
+                            /* the key bits for ellipsis in a flex row */
+                            flex: 1,
+                            minWidth: 0,
+                            display: "block",
+                            textAlign: "left",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
-                            textOverflow: "ellipsis"
+                            textOverflow: "ellipsis",
                         }}
-                        title="View details"
                         >
                         {r.title}
                         </button>
