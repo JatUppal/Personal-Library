@@ -1,85 +1,82 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import api from "../lib/api";
 
 export default function Login() {
-  const { login, register, authError } = useAuth();
-  const navigate = useNavigate();
-  const [mode, setMode] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  async function handleSubmit(e) {
+  async function submit(e) {
     e.preventDefault();
-    setSubmitting(true);
-    const ok = mode === "signin"
-      ? await login(email, password)
-      : await register(email, password);
-    setSubmitting(false);
-    if (ok) navigate("/main", { replace: true });
+    setErr("");
+    setBusy(true);
+    try {
+      const loginPath = import.meta.env.VITE_AUTH_LOGIN_PATH || "/api/v1/auth/login";
+      const mePath = import.meta.env.VITE_AUTH_ME_PATH || "/api/v1/auth/me";
+      const { data } = await api.post(loginPath, { email, password });
+
+      const token = data.token || data.accessToken || data.jwt;
+      if (!token) throw new Error("No token in login response");
+      localStorage.setItem("token", token);
+
+      try {
+        const me = await api.get(mePath);
+        if (me?.data?.displayName) localStorage.setItem("displayName", me.data.displayName);
+      } catch { /* non-fatal */ }
+
+      window.location.href = "/library";
+    } catch (e) {
+      const status = e?.response?.status;
+      if (status === 401 || status === 403) {
+        // bad credentials
+        setErr("Incorrect email or password. Please try again.");
+      } else if (e?.request && !e?.response) {
+        // network error / CORS / server down
+        setErr("Unable to reach the server. Please try again.");
+      } else {
+        setErr(e?.response?.data?.message || "Login failed");
+      }
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: "64px auto", padding: 16 }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <button
-          type="button"
-          onClick={() => setMode("signin")}
-          disabled={mode === "signin"}
-          style={{ padding: "6px 10px" }}
-        >
-          Sign in
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode("signup")}
-          disabled={mode === "signup"}
-          style={{ padding: "6px 10px" }}
-        >
-          Sign up
-        </button>
-      </div>
+    <div className="auth-wrap">
+      <div className="auth-card">
+        <h1 className="auth-title">Sign in</h1>
+        <p className="auth-sub">Welcome back to <strong>Personal Library</strong>.</p>
 
-      <h1 style={{ marginBottom: 16 }}>{mode === "signin" ? "Sign in" : "Create your account"}</h1>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ display: "block", marginBottom: 4 }}>Email</label>
+        <form onSubmit={submit} className="auth-form">
           <input
-            type="email"
+            className="input"
+            placeholder="email"
+            autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            required
-            style={{ width: "100%", padding: 8 }}
           />
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ display: "block", marginBottom: 4 }}>Password</label>
           <input
+            className="input"
+            placeholder="password"
             type="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-            style={{ width: "100%", padding: 8 }}
           />
-        </div>
+          <div className="auth-actions">
+            <button className="btn" disabled={busy}w>
+              {busy ? "Signing in…" : "Sign in"}
+            </button>
+            <span style={{ marginLeft: "auto", fontSize: 14 }}>
+              No account?{" "}
+              <a className="link" href="/register">Create one</a>
+            </span>
+          </div>
+        </form>
 
-        {authError && (
-          <div style={{ color: "crimson", marginBottom: 12 }}>{authError}</div>
-        )}
-
-        <button
-          type="submit"
-          disabled={submitting}
-          style={{ padding: "8px 12px", width: "100%" }}
-        >
-          {submitting
-            ? mode === "signin" ? "Signing in…" : "Creating account…"
-            : mode === "signin" ? "Sign in" : "Sign up"}
-        </button>
-      </form>
+        {err && <div style={{ color: "crimson", marginTop: 10 }}>{err}</div>}
+      </div>
     </div>
   );
 }

@@ -39,7 +39,9 @@ public class AuthenticationService {
             .role(Role.USER)
             .build();
         repository.save(user);
-        var jwtToken = jwtService.generateToken(user);
+        var claims = new java.util.HashMap<String, Object>();
+        claims.put("uid", user.getId());
+        var jwtToken = jwtService.generateToken(claims,user);
         return AuthenticationResponse.builder()
             .token(jwtToken)
             .build();
@@ -54,7 +56,9 @@ public class AuthenticationService {
         );
         var user = repository.findByEmail(request.getEmail())
             .orElseThrow(() -> new RuntimeException("User not found"));
-        var jwtToken = jwtService.generateToken(user);
+        var claims = new java.util.HashMap<String, Object>();
+        claims.put("uid", user.getId());
+        var jwtToken = jwtService.generateToken(claims,user);
         return AuthenticationResponse.builder()
             .token(jwtToken)
             .build();

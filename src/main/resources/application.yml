@@ -11,6 +11,10 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  google:
+    books:
+      # put your actual key in an env var, or paste it here for local only
+      apiKey: AIzaSyC1kYE2d5EA2SE7nr-wGwNUvX7wbHRgegA
 
 server:
   port: 8080

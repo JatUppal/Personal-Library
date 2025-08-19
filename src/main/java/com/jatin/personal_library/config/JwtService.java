@@ -19,7 +19,7 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "4939bd5c325a511b8843a845d205fc381577590f52d7a59b752adf8a21a3c6ed";
+    private static final String SECRET_KEY = "STm9XDJaURuIQ6hF0gX8OBV3WQ9S16WbdSrfiiGjxu0=";
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -44,7 +44,7 @@ public class JwtService {
             .claims(extraClaims)
             .subject(userDetails.getUsername())
             .issuedAt(new Date(System.currentTimeMillis()))
-            .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+            .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24)) // 24 hours
             .signWith(getSignInKey())
             .compact();
     }
