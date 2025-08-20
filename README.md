@@ -710,16 +710,19 @@ This project aims to streamline personal library management through secure, scal
 ## Demo
 
 ### 1) Creating An Account
+*👇 Click the thumbnail below to watch!*
 [![▶️ Sigining Up](docs/demo-creating-account.png)](docs/assets/videos/demo-creating-account.mp4?raw=1)
 
 ---
 
 ### 2) Adding Books
+*👇 Click the thumbnail below to watch!*
 [![▶️ Adding Books](docs/demo-user-library.png)](docs/assets/videos/demo-adding-books.mp4?raw=1)
 
 ---
 
 ### 3) Logging In + Features
+*👇 Click the thumbnail below to watch!*
 [![▶️ Logging In](docs/demo-features.png)](docs/assets/videos/demo-logging-in.mp4?raw=1)
 
 ---
