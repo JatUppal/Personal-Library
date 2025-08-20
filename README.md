@@ -710,29 +710,20 @@ This project aims to streamline personal library management through secure, scal
 ## Demo
 
 ### 1) Creating An Account
-<video controls width="960" preload="metadata">
-  <source src="docs/assets/videos/creating-acc.mp4?raw=1" type="video/mp4">
-</video>
-
-[Download MP4](docs/assets/videos/creating-acc.mp4?raw=1)
+<video src="/assets/videos/demo-creating-account.mp4" controls width="960" preload="metadata"></video>
+[Download MP4](docs/assets/videos/demo-creating-account.mp4?raw=1)
 
 ---
 
 ### 2) Adding Books
-<video controls width="960" preload="metadata">
-  <source src="docs/assets/videos/adding-books.mp4?raw=1" type="video/mp4">
-</video>
-
-[Download MP4](docs/assets/videos/adding-books.mp4?raw=1)
+<video src="/assets/videos/demo-adding-books.mp4" controls width="960" preload="metadata"></video>
+[Download MP4](docs/assets/videos/demo-adding-books.mp4?raw=1)
 
 ---
 
 ### 3) Logging In + Features
-<video controls width="960" preload="metadata">
-  <source src="docs/assets/videos/loggin-in.mp4?raw=1" type="video/mp4">
-</video>
-
-[Download MP4](docs/assets/videos/loggin-in.mp4?raw=1)
+<video src="/assets/videos/demo-logging-in.mp4" controls width="960" preload="metadata"></video>
+[Download MP4](docs/assets/videos/demo-logging-in.mp4?raw=1)
 
 ---
 
@@ -819,15 +810,6 @@ mvn test
 ```sh
 npm test
 ```
-
----
-
-## Roadmap
-
-- [X] **`Task 1`**: <strike>Implement feature one.</strike>
-- [ ] **`Task 2`**: Implement feature two.
-- [ ] **`Task 3`**: Implement feature three.
-
 ---
 
 <div align="left"><a href="#top">⬆ Return</a></div>
