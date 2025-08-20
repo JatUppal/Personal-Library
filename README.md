@@ -447,12 +447,12 @@ This project aims to streamline personal library management through secure, scal
 															</details>
 														</blockquote>
 													</details>
-													<!-- demo Submodule -->
+													<!--  Submodule -->
 													<details>
-														<summary><b>demo</b></summary>
+														<summary><b></b></summary>
 														<blockquote>
 															<div class='directory-path' style='padding: 8px 0; color: #666;'>
-																<code><b>⦿ src.main.java.com.jatin.personal_library.demo</b></code>
+																<code><b>⦿ src.main.java.com.jatin.personal_library.</b></code>
 															<table style='width: 100%; border-collapse: collapse;'>
 															<thead>
 																<tr style='background-color: #f8f9fa;'>
@@ -708,13 +708,31 @@ This project aims to streamline personal library management through secure, scal
 ---
 
 ## Demo
-### 1) Creating An Account (2:13)
-[![Watch the demo](https://im
-### 2) Adding Books (1:45)
-[![Watch the demo]
-### 3) Loggining In + Features (1:36)
-[![Watch the demo]
 
+### 1) Creating An Account
+<video controls width="960" preload="metadata">
+  <source src="docs/assets/videos/creating-acc.mp4?raw=1" type="video/mp4">
+</video>
+
+[Download MP4](docs/assets/videos/creating-acc.mp4?raw=1)
+
+---
+
+### 2) Adding Books
+<video controls width="960" preload="metadata">
+  <source src="docs/assets/videos/adding-books.mp4?raw=1" type="video/mp4">
+</video>
+
+[Download MP4](docs/assets/videos/adding-books.mp4?raw=1)
+
+---
+
+### 3) Logging In + Features
+<video controls width="960" preload="metadata">
+  <source src="docs/assets/videos/loggin-in.mp4?raw=1" type="video/mp4">
+</video>
+
+[Download MP4](docs/assets/videos/loggin-in.mp4?raw=1)
 
 ---
 
